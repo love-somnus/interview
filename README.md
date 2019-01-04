@@ -1,3 +1,5 @@
+# [「更多干货请访问wiki](https://github.com/love-somnus/interview/wiki)
+
 ## 和第三方系统交互的一些经验
 
 ①->和第三方交互（http）保证两边某笔交易处理信息一致
