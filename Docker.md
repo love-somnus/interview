@@ -1,4 +1,4 @@
-# 1、安装Docker
+# 47.96.100.1661、安装Docker
 
 ## 1.1 Ubuntu 14.04/16.04 (使用apt-get进行安装)
 
@@ -982,8 +982,8 @@ sudo apt-get install ruby
 ### 10.3.2 创建模板文件
 
 ```
-mkdir -p /usr/local/redis-cluster
-cd /usr/local/redis-cluster && touch redis-cluster.tmpl
+mkdir -p /usr/local/docker/redis-cluster
+cd /usr/local/docker/redis-cluster && touch redis-cluster.tmpl
 ```
 
 `redis-cluster.tmpl`内容如下
@@ -991,23 +991,29 @@ cd /usr/local/redis-cluster && touch redis-cluster.tmpl
 ```
 
 #指定端口
-port ${PORT}
+port ${port}
 #设置集群可用
 cluster-enabled yes
 #指定集群生成的配置文件名。注意，这个配置文件不是人为编辑的，是集群在运行中自动生成的，记录着集群中其他节点、状态信息、变量等配置信息，以便在启动的时候能重读到
 cluster-config-file nodes.conf
 #设置节点最大不可达时间，单位为毫秒。当主节点不可达时间超过这个设置时间，其对应的从节点将替换成为主节点；当一个节点在这个设置时间内不能访问到大多数主节点，将停止接收请求
 cluster-node-timeout 5000
+#要宣布的IP地址
+cluster-announce-ip 0.0.0.0
+#要宣布的数据端口
+cluster-announce-port ${port}
+#要宣布的集群总线端口
+cluster-announce-bus-port 1${port}
 #设置为aop模式
 appendonly yes
 #设置槽是否需要全覆盖。默认yes情况下，只要16384个槽没有被全覆盖，整个集群就停止服务。设置no之后，只要还有部分key都继续提供查询处理
 cluster-require-full-coverage no
 ```
 
-直接敲击命令如下
+三台服务器分别直接敲击命令如下
 
 ```
-for port in `seq 7000 7005`; do \
+for port in `seq 7001 7002`; do \
   mkdir -p ./${port}/conf \
   && PORT=${port} envsubst < ./redis-cluster.tmpl > ./${port}/conf/redis.conf \
   && mkdir -p ./${port}/data; \
@@ -1020,25 +1026,15 @@ done
 version: "3.1"
 services:
  
-  redis-7000:
-    image: redis:4.0
-    ports: 
-      - "7000:7000"
-      - "17000:17000"
-    volumes: 
-      - "/usr/local/redis-cluster/7000/conf/redis.conf:/usr/local/etc/redis/redis.conf"
-      - "/usr/local/redis-cluster/7000/data:/data"
-    restart: always
-    command: redis-server /usr/local/etc/redis/redis.conf
- 
   redis-7001:
     image: redis:4.0
     ports: 
       - "7001:7001"
       - "17001:17001"
     volumes: 
-      - "/usr/local/redis-cluster/7001/conf/redis.conf:/usr/local/etc/redis/redis.conf"
-      - "/usr/local/redis-cluster/7001/data:/data"
+      - "/usr/local/docker/redis-cluster/7001/conf/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "/usr/local/docker/redis-cluster/7001/data:/data"
+    container_name: redis-cluster-7001
     restart: always
     command: redis-server /usr/local/etc/redis/redis.conf
  
@@ -1048,47 +1044,15 @@ services:
       - "7002:7002"
       - "17002:17002"
     volumes: 
-      - "/usr/local/redis-cluster/7002/conf/redis.conf:/usr/local/etc/redis/redis.conf"
-      - "/usr/local/redis-cluster/7002/data:/data"
+      - "/usr/local/docker/redis-cluster/7002/conf/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "/usr/local/docker/redis-cluster/7002/data:/data"
+    container_name: redis-cluster-7002
     restart: always
     command: redis-server /usr/local/etc/redis/redis.conf
- 
-  redis-7003:
-    image: redis:4.0
-    ports: 
-      - "7003:7003"
-      - "17003:17003"
-    volumes: 
-      - "/usr/local/redis-cluster/7003/conf/redis.conf:/usr/local/etc/redis/redis.conf"
-      - "/usr/local/redis-cluster/7003/data:/data"
-    restart: always
-    command: redis-server /usr/local/etc/redis/redis.conf
- 
-  redis-7004:
-    image: redis:4.0
-    ports: 
-      - "7004:7004"
-      - "17004:17004"
-    volumes: 
-      - "/usr/local/redis-cluster/7004/conf/redis.conf:/usr/local/etc/redis/redis.conf"
-      - "/usr/local/redis-cluster/7004/data:/data"
-    restart: always
-    command: redis-server /usr/local/etc/redis/redis.conf
- 
-  redis-7005:
-    image: redis:4.0
-    ports: 
-      - "7005:7005"
-      - "17005:17005"
-    volumes: 
-      - "/usr/local/redis-cluster/7005/conf/redis.conf:/usr/local/etc/redis/redis.conf"
-      - "/usr/local/redis-cluster/7005/data:/data"
-    restart: always
-    command: redis-server /usr/local/etc/redis/redis.conf 
 ```
 
 ```
-cd /usr/local/master-cluster
+cd /usr/local/docker/redis-cluster
 #启动
 docker-compose up -d
 #停止
@@ -1099,15 +1063,153 @@ docker-compose rm
 
 至此三主三从全部启动完毕，下面需要关联，原始安装命令太过费劲，用官方推荐的`redis-trib`（ruby实现的）
 
+```
+redis-cli -c -h 121.43.162.28 -p 7001
+redis-cli -c -h 121.43.162.28 -p 7002
+
+redis-cli -c -h 47.96.100.166 -p 7001
+redis-cli -c -h 47.96.100.166 -p 7002
+
+redis-cli -c -h 118.24.136.23 -p 7001
+redis-cli -c -h 118.24.136.23 -p 7002
+```
+
+
+
 ### 10.3.4  关联三主三从，分配卡槽
 
 ```
-
+因为最新的5.0 不再推荐使用ruby，所以拿redis-stable/src/redis-trib.rb操作不了，我又找不到老版本的在线rb文件，所以用下面给的吧
 docker run -it --rm ruby sh -c '\
-  gem install redis \
+  gem install redis --version=4.0.0\
   && wget http://download.redis.io/redis-stable/src/redis-trib.rb \
-  && ruby redis-trib.rb create --replicas 1  121.43.162.28:7000 121.43.162.28:7001 121.43.162.28:7002 121.43.162.28:7003 121.43.162.28:7004 121.43.162.28:7005'
+  && ruby redis-trib.rb create --replicas 1 \
+  121.43.162.28:7001 \
+  121.43.162.28:7002 \
+  47.96.100.166:7001 \
+  47.96.100.166:7002 \
+  118.24.136.237:7001 \
+  118.24.136.237:7002'
 ```
+
+```
+docker run -it --rm ruby sh -c '\
+  gem install redis --version=4.1.0\
+  && wget http://101.44.1.7/files/116000000758C248/download.redis.io/releases/redis-4.0.11.tar.gz \
+  && tar -zxvf redis-4.0.11.tar.gz\
+  && cd redis-4.0.11/src\
+  && ruby redis-trib.rb create --replicas 1 \
+  121.43.162.28:7001 \
+  121.43.162.28:7002 \
+  47.96.100.166:7001 \
+  47.96.100.166:7002 \
+  118.24.136.237:7001 \
+  118.24.136.237:7002'
+```
+
+```
+>>> Creating cluster
+>>> Performing hash slots allocation on 6 nodes...
+Using 3 masters:
+121.43.162.28:7001
+47.96.100.166:7001
+118.24.136.237:7001
+Adding replica 47.96.100.166:7002 to 121.43.162.28:7001
+Adding replica 118.24.136.237:7002 to 47.96.100.166:7001
+Adding replica 121.43.162.28:7002 to 118.24.136.237:7001
+M: 6a8aaa3a2b5bbb5c768db9a2b5be6b653a060507 121.43.162.28:7001
+   slots:0-5460 (5461 slots) master
+S: 8f5b062d6cfc741f93dc4268bfdb264c922a1d4b 121.43.162.28:7002
+   replicates 452d3091dcb62e479e2f823c849df40a7d01f9ed
+M: c4885c0bc06e417bed929699147c41aa88a98aa9 47.96.100.166:7001
+   slots:5461-10922 (5462 slots) master
+S: 95f70de1ed840fbee1ef6d07b255ea974299bf7e 47.96.100.166:7002
+   replicates 6a8aaa3a2b5bbb5c768db9a2b5be6b653a060507
+M: 452d3091dcb62e479e2f823c849df40a7d01f9ed 118.24.136.237:7001
+   slots:10923-16383 (5461 slots) master
+S: 6d771e7ac6592b0d4d7c6e7812977cf7713b1ac3 118.24.136.237:7002
+   replicates c4885c0bc06e417bed929699147c41aa88a98aa9
+Can I set the above configuration? (type 'yes' to accept): yes
+>>> Nodes configuration updated
+>>> Assign a different config epoch to each node
+>>> Sending CLUSTER MEET messages to join the cluster
+Waiting for the cluster to join...
+>>> Performing Cluster Check (using node 121.43.162.28:7001)
+M: 6a8aaa3a2b5bbb5c768db9a2b5be6b653a060507 121.43.162.28:7001
+   slots:0-5460 (5461 slots) master
+   1 additional replica(s)
+M: c4885c0bc06e417bed929699147c41aa88a98aa9 47.96.100.166:7001
+   slots:5461-10922 (5462 slots) master
+   1 additional replica(s)
+S: 95f70de1ed840fbee1ef6d07b255ea974299bf7e 47.96.100.166:7002
+   slots: (0 slots) slave
+   replicates 6a8aaa3a2b5bbb5c768db9a2b5be6b653a060507
+S: 6d771e7ac6592b0d4d7c6e7812977cf7713b1ac3 118.24.136.237:7002
+   slots: (0 slots) slave
+   replicates c4885c0bc06e417bed929699147c41aa88a98aa9
+M: 452d3091dcb62e479e2f823c849df40a7d01f9ed 118.24.136.237:7001
+   slots:10923-16383 (5461 slots) master
+   1 additional replica(s)
+S: 8f5b062d6cfc741f93dc4268bfdb264c922a1d4b 121.43.162.28:7002
+   slots: (0 slots) slave
+   replicates 452d3091dcb62e479e2f823c849df40a7d01f9ed
+[OK] All nodes agree about slots configuration.
+>>> Check for open slots...
+>>> Check slots coverage...
+[OK] All 16384 slots covered. 
+```
+
+
+
+### 10.3.5 集群检查
+
+```
+docker run -it --rm ruby sh -c '\
+  gem install redis --version=4.1.0\
+  && wget http://101.44.1.7/files/116000000758C248/download.redis.io/releases/redis-4.0.11.tar.gz \
+  && tar -zxvf redis-4.0.11.tar.gz\
+  && cd redis-4.0.11/src\
+  && ruby redis-trib.rb check 121.43.162.28:7001'
+
+```
+
+```
+>>> Performing Cluster Check (using node 121.43.162.28:7001)
+M: 6a8aaa3a2b5bbb5c768db9a2b5be6b653a060507 121.43.162.28:7001
+   slots:0-5460 (5461 slots) master
+   1 additional replica(s)
+M: c4885c0bc06e417bed929699147c41aa88a98aa9 47.96.100.166:7001
+   slots:5461-10922 (5462 slots) master
+   1 additional replica(s)
+S: 95f70de1ed840fbee1ef6d07b255ea974299bf7e 47.96.100.166:7002
+   slots: (0 slots) slave
+   replicates 6a8aaa3a2b5bbb5c768db9a2b5be6b653a060507
+S: 6d771e7ac6592b0d4d7c6e7812977cf7713b1ac3 118.24.136.237:7002
+   slots: (0 slots) slave
+   replicates c4885c0bc06e417bed929699147c41aa88a98aa9
+M: 452d3091dcb62e479e2f823c849df40a7d01f9ed 118.24.136.237:7001
+   slots:10923-16383 (5461 slots) master
+   0 additional replica(s)
+[OK] All nodes agree about slots configuration.
+>>> Check for open slots...
+>>> Check slots coverage...
+[OK] All 16384 slots covered.
+```
+
+
+
+### 10.3.5 info查看集群信息
+
+```
+docker run -it --rm ruby sh -c '\
+  gem install redis --version=4.1.0\
+  && wget http://101.44.1.7/files/116000000758C248/download.redis.io/releases/redis-4.0.11.tar.gz \
+  && tar -zxvf redis-4.0.11.tar.gz\
+  && cd redis-4.0.11/src\
+  && ruby redis-trib.rb info 121.43.162.28:7001'
+```
+
+
 
 # 11 、docker compose 安装SpringBoot
 
