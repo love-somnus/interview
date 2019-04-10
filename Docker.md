@@ -977,6 +977,8 @@ repl_backlog_histlen:27688
 
 ```
 sudo apt-get install ruby
+
+sudo yum install ruby
 ```
 
 ### 10.3.2 创建模板文件
