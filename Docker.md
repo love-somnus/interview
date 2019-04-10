@@ -1022,6 +1022,8 @@ for port in `seq 7001 7002`; do \
 done
 ```
 
+记得改**cluster-announce-ip 0.0.0.0** 为具体ip
+
 ### 10.3.3 docker-compose.yml
 
 ```
@@ -1097,8 +1099,8 @@ docker run -it --rm ruby sh -c '\
 ```
 docker run -it --rm ruby sh -c '\
   gem install redis --version=4.1.0\
-  && wget http://101.44.1.7/files/116000000758C248/download.redis.io/releases/redis-4.0.11.tar.gz \
-  && tar -zxvf redis-4.0.11.tar.gz\
+  && wget https://github.com/antirez/redis/archive/4.0.11.tar.gz \
+  && tar -zxvf 4.0.11.tar.gz\
   && cd redis-4.0.11/src\
   && ruby redis-trib.rb create --replicas 1 \
   121.43.162.28:7001 \
@@ -1168,8 +1170,8 @@ S: 8f5b062d6cfc741f93dc4268bfdb264c922a1d4b 121.43.162.28:7002
 ```
 docker run -it --rm ruby sh -c '\
   gem install redis --version=4.1.0\
-  && wget http://101.44.1.7/files/116000000758C248/download.redis.io/releases/redis-4.0.11.tar.gz \
-  && tar -zxvf redis-4.0.11.tar.gz\
+  && wget https://github.com/antirez/redis/archive/4.0.11.tar.gz \
+  && tar -zxvf 4.0.11.tar.gz\
   && cd redis-4.0.11/src\
   && ruby redis-trib.rb check 121.43.162.28:7001'
 
@@ -1205,8 +1207,8 @@ M: 452d3091dcb62e479e2f823c849df40a7d01f9ed 118.24.136.237:7001
 ```
 docker run -it --rm ruby sh -c '\
   gem install redis --version=4.1.0\
-  && wget http://101.44.1.7/files/116000000758C248/download.redis.io/releases/redis-4.0.11.tar.gz \
-  && tar -zxvf redis-4.0.11.tar.gz\
+  && wget https://github.com/antirez/redis/archive/4.0.11.tar.gz \
+  && tar -zxvf 4.0.11.tar.gz\
   && cd redis-4.0.11/src\
   && ruby redis-trib.rb info 121.43.162.28:7001'
 ```
