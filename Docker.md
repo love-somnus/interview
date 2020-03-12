@@ -99,7 +99,10 @@ $ sudo service docker start
 ```json
 {
   "registry-mirrors": [
-    "https://7jlsf15h.mirror.aliyuncs.com"
+    "https://hub-mirror.c.163.com",
+    "https://registry.aliyuncs.com",
+    "https://registry.docker-cn.com",
+    "https://docker.mirrors.ustc.edu.cn"
   ]
 }
 ```
@@ -163,6 +166,22 @@ Collecting docker-compose
 ...
 Successfully installed docker-compose cached-property requests texttable websocket-client docker-py dockerpty six enum34 backports.ssl-match-hostname ipaddress
 ```
+
+进入容器内部
+
+```
+docker exec -it wiki bash
+```
+
+拷贝文件
+
+```
+docker inspect -f '{{.ID}}' wiki
+
+docker cp /root/LocalSettings.php a2f7df1bf0f847f535daa10af4563679088eb7b2443ae0a1dde421cfdffc1688:/var/www/html/
+```
+
+
 
 # 6、安装zookeeper
 
