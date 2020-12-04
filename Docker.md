@@ -252,7 +252,6 @@ services:
   WatchedEvent state:SyncConnected type:None path:null
   ```
 
-
 - 使用服务端工具检查服务器状态
 
   ```
@@ -261,7 +260,6 @@ services:
   Using config: /conf/zoo.cfg
   Mode: standalone
   ```
-
 
 
 
@@ -450,12 +448,209 @@ Mode: leader
 
 从上面的验证结果可以看出：zoo1 为跟随者，zoo2 为跟随者，zoo3 为领导者
 
-#  7、 安装rabbitmq
+# 7、 安装rabbitmq
+
+## 7.1 单机
 
 ```she
-docker pull rabbitmq:3-management
-docker run --name rabbitmq -p 5672:5672 -p 15672:15672 -d rabbitmq:3-management
+docker pull rabbitmq:management
+docker run --name rabbitmq -p 5672:5672 -p 15672:15672 -d rabbitmq:management
 ```
+
+## 7.2 集群
+
+### 7.2.1 启动
+
+三台机器 , docker-compose 配置文件分别如下
+
+位置 /usr/local/docker/rabbitmq/docker-compose.yml
+
+192.168.95.36
+
+```yaml
+version: '3'
+
+services:
+  rabbit1:
+    container_name: rabbit1
+    image: rabbitmq:management
+    restart: always
+    hostname: rabbit1
+    extra_hosts:
+      - "rabbit1:192.168.95.36"
+      - "rabbit2:192.168.95.37"
+      - "rabbit3:192.168.95.38"
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=rabbitmq_cookie
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=passw0rd
+    ports:
+      - "4369:4369"
+      - "5671:5671"
+      - "5672:5672"
+      - "15671:15671"
+      - "15672:15672"
+      - "25672:25672"
+```
+
+192.168.95.37 
+
+```yaml
+version: '3'
+
+services:
+  rabbit1:
+    container_name: rabbit2
+    image: rabbitmq:management
+    restart: always
+    hostname: rabbit2
+    extra_hosts:
+      - "rabbit1:192.168.95.36"
+      - "rabbit2:192.168.95.37"
+      - "rabbit3:192.168.95.38"
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=rabbitmq_cookie
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=passw0rd
+    ports:
+      - "4369:4369"
+      - "5671:5671"
+      - "5672:5672"
+      - "15671:15671"
+      - "15672:15672"
+      - "25672:25672"
+```
+
+ 192.168.95.38
+
+```yaml
+version: '3'
+
+services:
+  rabbit1:
+    container_name: rabbit3
+    image: rabbitmq:management
+    restart: always
+    hostname: rabbit3
+    extra_hosts:
+      - "rabbit1:192.168.95.36"
+      - "rabbit2:192.168.95.37"
+      - "rabbit3:192.168.95.38"
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=rabbitmq_cookie
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=passw0rd
+    ports:
+      - "4369:4369"
+      - "5671:5671"
+      - "5672:5672"
+      - "15671:15671"
+      - "15672:15672"
+      - "25672:25672"
+```
+
+启动命令 
+
+```unix
+cd /usr/local/docker/rabbitmq
+docker-compose up -d
+```
+
+### 7.2.3 加入集群
+
+如果将 `rabbit1` 作为主节点的话，需要在 `rabbit2` 上执行命令，将其加入到集群，如下：
+
+```unix
+# docker exec -it rabbit2 /bin/bash
+
+rabbit2# rabbitmqctl stop_app
+rabbit2# rabbitmqctl reset
+rabbit2# rabbitmqctl join_cluster rabbit@rabbit1
+rabbit2# rabbitmqctl start_app
+```
+
+默认情况下，RabbitMQ 启动后是磁盘节点，如果想以内存节点方式加入，可以加 `--ram` 参数。
+
+如果想要修改节点类型，可以使用命令：
+
+```unix
+# rabbitmqctl change_cluster_node_type disc(ram)
+```
+
+修改节点类型之前需要先 `rabbitmqctl stop_app`。
+
+通过下面命令来查看集群状态：
+
+```unix
+rabbitmqctl cluster_status
+```
+
+注意，由于 RAM 节点仅将内部数据库表存储在内存中，因此在内存节点启动时必须从其他节点同步这些数据，所以一个集群必须至少包含一个磁盘节点。
+
+### 7.2.4 负载均衡
+
+ha 同样采用 Docker 方式来部署，先看一下 haproxy.cfg 配置文件：
+
+```cfg
+# Simple configuration for an HTTP proxy listening on port 80 on all
+# interfaces and forwarding requests to a single backend "servers" with a
+# single server "server1" listening on 127.0.0.1:8000
+
+global
+    daemon
+    maxconn 256
+
+defaults
+    mode http
+    timeout connect 5000ms
+    timeout client 5000ms
+    timeout server 5000ms
+
+listen rabbitmq_cluster
+    bind *:5672
+    option tcplog
+    mode tcp
+    balance leastconn
+    server  rabbit1 192.168.95.36:5672 weight 1 check inter 2s rise 2 fall 3
+    server  rabbit2 192.168.95.37:5672 weight 1 check inter 2s rise 2 fall 3
+    server  rabbit3 192.168.95.38:5672 weight 1 check inter 2s rise 2 fall 3
+
+listen http_front
+    bind 0.0.0.0:8002
+    stats uri /haproxy?stats
+
+listen rabbitmq_admin
+    bind *:8001
+    server rabbit1 192.168.95.36:15672
+    server rabbit2 192.168.95.37:15672
+    server rabbit3 192.168.95.38:15672
+
+```
+
+docker-compose 文件：
+
+```yaml
+version: '3'
+
+services:
+  haproxy:
+    container_name: haproxy
+    image: haproxy:latest
+    restart: always
+    network_mode: rabbitmq_default
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "5672:5672"
+      - "8001:8001"
+      - "8002:8002"
+```
+
+启动之后，就可以通过 ha 的地址来访问 RabbitMQ 集群管理页面了。
+
+<http://192.168.95.28:8001/>
+
+如果公司内部有现成的负载均衡，比如 LVS，那么也可以省略这一步。
 
 
 
@@ -1010,7 +1205,6 @@ cd /usr/local/docker/redis-cluster && touch redis-cluster.tmpl
 `redis-cluster.tmpl`内容如下
 
 ```
-
 #指定端口
 port ${port}
 #设置集群可用
@@ -1236,7 +1430,7 @@ docker run -it --rm ruby sh -c '\
 
 # 11 、docker compose 安装SpringBoot
 
-##  11.1 创建dockerfile文件
+## 11.1 创建dockerfile文件
 
 ```
 FROM openjdk:8-jre
@@ -1399,4 +1593,3 @@ services:
 ```
 find / -name \*kafka_\* | head -1 | grep -o '\kafka[^\n]*'
 ```
-
