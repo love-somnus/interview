@@ -1207,6 +1207,8 @@ cd /usr/local/docker/redis-cluster && touch redis-cluster.tmpl
 ```
 #指定端口
 port ${port}
+#设置事件通知（过期）
+notify-keyspace-events Ex
 #设置集群可用
 cluster-enabled yes
 #指定集群生成的配置文件名。注意，这个配置文件不是人为编辑的，是集群在运行中自动生成的，记录着集群中其他节点、状态信息、变量等配置信息，以便在启动的时候能重读到
