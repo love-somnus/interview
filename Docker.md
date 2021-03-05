@@ -1235,7 +1235,7 @@ for port in `seq 7001 7002`; do \
 done
 ```
 
-记得改**cluster-announce-ip 0.0.0.0** 为具体ip
+>>记得改**cluster-announce-ip 0.0.0.0** 为具体ip
 
 ### 10.3.3 docker-compose.yml
 
@@ -1276,7 +1276,7 @@ redis-cli -c -h 192.168.95.31 -p 6379
 
 ### 10.3.4  关联三主三从，分配卡槽
 
-```
+
 因为最新的5.0 不再推荐使用ruby，所以拿redis-stable/src/redis-trib.rb操作不了，我又找不到老版本的在线rb文件，所以用下面给的吧
 
 ```
