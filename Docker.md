@@ -1243,27 +1243,15 @@ done
 version: "3.1"
 services:
  
-  redis-7001:
+  redis:
     image: redis:4.0
     ports: 
-      - "7001:7001"
-      - "17001:17001"
+      - "6379:6379"
+      - "16379:16379"
     volumes: 
-      - "/usr/local/docker/redis-cluster/7001/conf/redis.conf:/usr/local/etc/redis/redis.conf"
-      - "/usr/local/docker/redis-cluster/7001/data:/data"
-    container_name: redis-cluster-7001
-    restart: always
-    command: redis-server /usr/local/etc/redis/redis.conf
- 
-  redis-7002:
-    image: redis:4.0
-    ports: 
-      - "7002:7002"
-      - "17002:17002"
-    volumes: 
-      - "/usr/local/docker/redis-cluster/7002/conf/redis.conf:/usr/local/etc/redis/redis.conf"
-      - "/usr/local/docker/redis-cluster/7002/data:/data"
-    container_name: redis-cluster-7002
+      - "/usr/local/docker/redis-cluster/6379/conf/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "/usr/local/docker/redis-cluster/6379/data:/data"
+    container_name: redis-cluster
     restart: always
     command: redis-server /usr/local/etc/redis/redis.conf
 ```
@@ -1281,14 +1269,7 @@ docker-compose rm
 至此三主三从全部启动完毕，下面需要关联，原始安装命令太过费劲，用官方推荐的`redis-trib`（ruby实现的）
 
 ```
-redis-cli -c -h 121.43.162.28 -p 7001
-redis-cli -c -h 121.43.162.28 -p 7002
-
-redis-cli -c -h 47.96.100.166 -p 7001
-redis-cli -c -h 47.96.100.166 -p 7002
-
-redis-cli -c -h 118.24.136.23 -p 7001
-redis-cli -c -h 118.24.136.23 -p 7002
+redis-cli -c -h 192.168.95.31 -p 6379
 ```
 
 
@@ -1297,17 +1278,6 @@ redis-cli -c -h 118.24.136.23 -p 7002
 
 ```
 因为最新的5.0 不再推荐使用ruby，所以拿redis-stable/src/redis-trib.rb操作不了，我又找不到老版本的在线rb文件，所以用下面给的吧
-docker run -it --rm ruby sh -c '\
-  gem install redis --version=4.0.0\
-  && wget http://download.redis.io/redis-stable/src/redis-trib.rb \
-  && ruby redis-trib.rb create --replicas 1 \
-  121.43.162.28:7001 \
-  121.43.162.28:7002 \
-  47.96.100.166:7001 \
-  47.96.100.166:7002 \
-  118.24.136.237:7001 \
-  118.24.136.237:7002'
-```
 
 ```
 docker run -it --rm ruby sh -c '\
@@ -1376,8 +1346,6 @@ S: 8f5b062d6cfc741f93dc4268bfdb264c922a1d4b 121.43.162.28:7002
 [OK] All 16384 slots covered. 
 ```
 
-
-
 ### 10.3.5 集群检查
 
 ```
@@ -1386,7 +1354,7 @@ docker run -it --rm ruby sh -c '\
   && wget https://github.com/antirez/redis/archive/4.0.11.tar.gz \
   && tar -zxvf 4.0.11.tar.gz\
   && cd redis-4.0.11/src\
-  && ruby redis-trib.rb check 121.43.162.28:7001'
+  && ruby redis-trib.rb check 192.168.95.31:6379'
 
 ```
 
@@ -1413,8 +1381,6 @@ M: 452d3091dcb62e479e2f823c849df40a7d01f9ed 118.24.136.237:7001
 [OK] All 16384 slots covered.
 ```
 
-
-
 ### 10.3.5 info查看集群信息
 
 ```
@@ -1425,8 +1391,6 @@ docker run -it --rm ruby sh -c '\
   && cd redis-4.0.11/src\
   && ruby redis-trib.rb info 121.43.162.28:7001'
 ```
-
-
 
 # 11 、docker compose 安装SpringBoot
 
