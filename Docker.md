@@ -682,7 +682,7 @@ docker run -d -p 3306:3306 -v /data/mysql/conf:/etc/mysql/conf.d \
 ## 9.1 单机
 
 ```she
-docker run --name redis-6380 -p 6380:6379 -d redis:4.0 --requirepass "passw0rd"
+docker run --name redis -p 6379:6379 -d --restart=always redis:4.0 redis-server --appendonly yes --requirepass "passw0rd"
 ```
 
 ## 9.2 主从
