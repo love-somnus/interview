@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <!-- localRepository
+   | The path to the local repository maven will use to store artifacts.
+   |
+   | Default: ${user.home}/.m2/repository
+  -->
+  
+  <localRepository>E:/apache/.m2/repository</localRepository>
+
+  <pluginGroups>
+
+  </pluginGroups>
+
+  <proxies>
+
+  </proxies>
+
+  <servers>
+    <server>
+      <id>wt-snapshots</id>
+      <username>admin</username>
+      <password>123456</password>
+    </server>
+    <server>
+      <id>wt-releases</id>
+      <username>admin</username>
+      <password>123456</password>
+    </server>
+  </servers>
+
+  <mirrors>
+
+    <mirror>
+      <id>somnus-repo</id>
+      <name>somnus</name>
+      <url>http://nexus.somnus.com/repository/maven-public</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>aliyun-public</id>
+      <name>aliyun-public-repo</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+      <mirrorOf>public</mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>aliyun-central</id>
+      <name>aliyun-central-repo</name>
+      <url>https://maven.aliyun.com/repository/central</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>aliyun-grails-core</id>
+      <name>aliyun-grails-core-repo</name>
+      <url>https://maven.aliyun.com/repository/grails-core</url>
+      <mirrorOf>grails-core</mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>aliyun-spring</id>
+      <name>aliyun-spring-repo</name>
+      <url>https://maven.aliyun.com/repository/spring</url>
+      <mirrorOf>spring</mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>aliyun-google</id>
+      <name>aliyun-google-repo</name>
+      <url>https://maven.aliyun.com/repository/google</url>
+      <mirrorOf>google</mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>aliyun-gradle-plugin</id>
+      <name>liyun-gradle-plugin</name>
+      <url>https://maven.aliyun.com/repository/gradle-plugin</url>
+      <mirrorOf>gradle-plugin</mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>aliyun-spring-plugin</id>
+      <name>liyun-spring-plugin</name>
+      <url>https://maven.aliyun.com/repository/spring-plugin</url>
+      <mirrorOf>spring-plugin</mirrorOf>
+    </mirror>
+
+  </mirrors>
+
+  <profiles>
+    <profile>
+      <id>somnus-profile</id>
+      <activation>
+        <jdk>1.8</jdk>
+      </activation>
+
+      <repositories>
+        <repository>
+			    <id>netease-repo</id>
+			    <name>netease nexus</name>
+			    <url>http://nexus.web.netease.com/repository/maven-public</url>
+    			<releases>
+    				<enabled>true</enabled>
+    			</releases>
+    			<snapshots>
+    				<enabled>true</enabled>
+    			</snapshots>
+		    </repository>
+
+    		<repository>
+    			<id>public</id>
+    			<name>aliyun-public-repo</name>
+    			<url>https://maven.aliyun.com/repository/public</url>
+    			<releases>
+    				<enabled>true</enabled>
+    			</releases>
+    			<snapshots>
+    				 <enabled>true</enabled>
+    			</snapshots>
+    		</repository>
+
+        <repository>
+          <id>central</id>
+          <name>aliyun-central-repo</name>
+          <url>https://maven.aliyun.com/repository/central</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+             <enabled>true</enabled>
+          </snapshots>
+        </repository>
+
+        <repository>
+          <id>grails-core</id>
+          <name>aliyun-grails-core-repo</name>
+          <url>https://maven.aliyun.com/repository/grails-core</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+             <enabled>true</enabled>
+          </snapshots>
+        </repository>
+
+        <repository>
+          <id>spring</id>
+          <name>aliyun-spring-repo</name>
+          <url>https://maven.aliyun.com/repository/spring</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+             <enabled>true</enabled>
+          </snapshots>
+        </repository>
+
+        <repository>
+          <id>google</id>
+          <name>aliyun-google-repo</name>
+          <url>https://maven.aliyun.com/repository/google</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+             <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+
+
+      <pluginRepositories>
+        <pluginRepository>
+          <id>gradle-plugin</id>
+          <name>aliyun-gradle-plugin</name>
+          <url>https://maven.aliyun.com/repository/gradle-plugin</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+             <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+
+        <pluginRepository>
+          <id>spring-plugin</id>
+          <name>aliyun-spring-plugin</name>
+          <url>https://maven.aliyun.com/repository/spring-plugin</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+             <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>somnus-profile</activeProfile>
+  </activeProfiles>
+  
+</settings>
