@@ -8,7 +8,7 @@
    |
    | Default: ${user.home}/.m2/repository
   -->
-  
+
   <localRepository>E:/apache/.m2/repository</localRepository>
 
   <pluginGroups>
@@ -36,7 +36,7 @@
 
     <mirror>
       <id>somnus-repo</id>
-      <name>somnus</name>
+      <name>nsomnus</name>
       <url>http://nexus.somnus.com/repository/maven-public</url>
       <mirrorOf>*</mirrorOf>
     </mirror>
@@ -100,29 +100,30 @@
       </activation>
 
       <repositories>
+        
         <repository>
-			    <id>netease-repo</id>
-			    <name>netease nexus</name>
-			    <url>http://nexus.web.netease.com/repository/maven-public</url>
-    			<releases>
-    				<enabled>true</enabled>
-    			</releases>
-    			<snapshots>
-    				<enabled>true</enabled>
-    			</snapshots>
-		    </repository>
+          <id>netease-repo</id>
+          <name>netease nexus</name>
+          <url>http://nexus.web.netease.com/repository/maven-public</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
 
-    		<repository>
-    			<id>public</id>
-    			<name>aliyun-public-repo</name>
-    			<url>https://maven.aliyun.com/repository/public</url>
-    			<releases>
-    				<enabled>true</enabled>
-    			</releases>
-    			<snapshots>
-    				 <enabled>true</enabled>
-    			</snapshots>
-    		</repository>
+        <repository>
+          <id>public</id>
+          <name>aliyun-public-repo</name>
+          <url>https://maven.aliyun.com/repository/public</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
 
         <repository>
           <id>central</id>
@@ -132,7 +133,7 @@
             <enabled>true</enabled>
           </releases>
           <snapshots>
-             <enabled>true</enabled>
+            <enabled>true</enabled>
           </snapshots>
         </repository>
 
@@ -144,7 +145,7 @@
             <enabled>true</enabled>
           </releases>
           <snapshots>
-             <enabled>true</enabled>
+            <enabled>true</enabled>
           </snapshots>
         </repository>
 
@@ -156,7 +157,7 @@
             <enabled>true</enabled>
           </releases>
           <snapshots>
-             <enabled>true</enabled>
+            <enabled>true</enabled>
           </snapshots>
         </repository>
 
@@ -168,11 +169,10 @@
             <enabled>true</enabled>
           </releases>
           <snapshots>
-             <enabled>true</enabled>
+            <enabled>true</enabled>
           </snapshots>
         </repository>
       </repositories>
-
 
       <pluginRepositories>
         <pluginRepository>
@@ -183,7 +183,7 @@
             <enabled>true</enabled>
           </releases>
           <snapshots>
-             <enabled>true</enabled>
+            <enabled>true</enabled>
           </snapshots>
         </pluginRepository>
 
@@ -195,7 +195,7 @@
             <enabled>true</enabled>
           </releases>
           <snapshots>
-             <enabled>true</enabled>
+            <enabled>true</enabled>
           </snapshots>
         </pluginRepository>
       </pluginRepositories>
